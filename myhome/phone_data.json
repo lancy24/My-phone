@@ -1,0 +1,30 @@
+{
+  "notes.txt": [
+    [
+      "THOUGHT",
+      "20-11-2026 20:27",
+      "data analysis",
+      "aaaaaaaaaaaaaaaaaaaaaaaa"
+    ]
+  ],
+  "todo.txt": [
+    [
+      "TODO",
+      "20-11-2026 20:27",
+      "done",
+      "water intake"
+    ]
+  ],
+  "diary": [
+    {
+      "date": "2026-11-20",
+      "photo": "KIMT LOGO.png",
+      "caption": "kimt"
+    }
+  ],
+  "settings": {
+    "dark": false,
+    "wallpaper": "img:Camera-20261120-203153-15bd1259.jpg",
+    "pin": "2025"
+  }
+}
