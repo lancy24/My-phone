@@ -2,7 +2,7 @@ from datetime import datetime
 
 import streamlit as st
 
-from storage import read, update
+from storage import local_mode, read, update
 
 
 NOTES_FILE = "notes.txt"
@@ -10,6 +10,8 @@ TODO_FILE = "todo.txt"
 
 
 def legacy_notes(file):
+    if not local_mode():
+        return []
     try:
         with open(file, encoding="utf-8") as f:
             return [line.strip().split("|", 3) for line in f if line.strip()]

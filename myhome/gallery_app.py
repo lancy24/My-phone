@@ -8,16 +8,16 @@ from uuid import uuid4
 import streamlit as st
 
 from look import save_settings
-from storage import update
+from storage import media_directory, update
 
 
-IMG_DIR = Path("images")
-IMG_DIR.mkdir(exist_ok=True)
+def image_directory():
+    return media_directory("images")
 
 
 def list_images():
     exts = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
-    return sorted(p for p in IMG_DIR.iterdir() if p.suffix.lower() in exts)
+    return sorted(p for p in image_directory().iterdir() if p.is_file() and p.suffix.lower() in exts)
 
 
 def run():
@@ -30,11 +30,12 @@ def run():
     )
 
     if st.button("Save pictures") and files:
+        directory = image_directory()
         for f in files:
             name = Path(f.name).name
-            target = IMG_DIR / name
+            target = directory / name
             if target.exists():
-                target = IMG_DIR / f"{target.stem}-{uuid4().hex[:8]}{target.suffix}"
+                target = directory / f"{target.stem}-{uuid4().hex[:8]}{target.suffix}"
             target.write_bytes(f.getbuffer())
         st.toast("Pictures saved")
         st.rerun()

@@ -5,7 +5,7 @@ from pathlib import Path
 import streamlit as st
 from PIL import Image
 
-from storage import legacy_settings, read, update
+from storage import legacy_settings, media_directory, read, update
 
 
 DEFAULTS = {
@@ -52,7 +52,7 @@ def wallpaper_background(settings):
     wp = settings["wallpaper"]
 
     if wp.startswith("img:") and Path(wp[4:]).name == wp[4:]:
-        path = Path("images") / wp[4:]
+        path = media_directory("images") / wp[4:]
 
         try:
             return photo_background(str(path), path.stat().st_mtime)
@@ -84,7 +84,9 @@ def base_css(dark):
     }}
     [data-testid="stHeader"] {{ background: transparent; }}
     .block-container {{ max-width: 900px; padding-top: 3.25rem; }}
-    .stApp :is(h1, h2, h3, label, [data-testid="stMarkdownContainer"]) {{
+    .stApp :is(h1, h2, h3, h4, label, [data-testid="stMarkdownContainer"],
+               [data-testid="stMetricValue"], [data-testid="stMetricLabel"],
+               [data-testid="stExpander"] summary, [data-baseweb="tab"]) {{
         color: var(--phone-text);
     }}
     .stApp [data-testid="stCaptionContainer"] p {{
@@ -96,10 +98,14 @@ def base_css(dark):
         background: var(--phone-surface);
         color: var(--phone-text);
     }}
-    .stApp :is(.stButton, .stFormSubmitButton) > button:hover {{
+    .stApp :is(.stButton, .stDownloadButton, .stFormSubmitButton) > button:hover:not(:disabled) {{
         border-color: var(--phone-accent);
         background: var(--phone-accent);
         color: #fff;
+    }}
+    .stApp :is(.stButton, .stDownloadButton, .stFormSubmitButton, [data-testid="stPopover"])
+        > button [data-testid="stMarkdownContainer"] {{
+        color: inherit;
     }}
     .stApp button:focus-visible {{
         outline: 2px solid #b87386;
@@ -110,7 +116,15 @@ def base_css(dark):
         background: var(--phone-surface);
         color: var(--phone-text);
     }}
-    .stApp :is(input, textarea) {{ color: var(--phone-text); }}
+    .stApp :is(input, textarea) {{
+        background-color: var(--phone-surface);
+        color: var(--phone-text);
+        caret-color: var(--phone-text);
+    }}
+    .stApp :is(input, textarea)::placeholder {{
+        color: var(--phone-muted);
+        opacity: 1;
+    }}
     .stApp .phone-calendar {{
         width: 100%;
         table-layout: fixed;

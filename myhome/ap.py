@@ -13,10 +13,20 @@ import music_app
 import settings_app
 import camera_app
 from look import load_settings, save_settings, base_css, frame_css
-from storage import read
+from storage import local_mode, read
 
 
 st.set_page_config(page_title="My Phone", page_icon="📱", layout="wide")
+
+if not local_mode():
+    if not getattr(st.user, "is_logged_in", False):
+        st.title("📱 My Phone")
+        if st.button("Sign in with Google", type="primary"):
+            st.login()
+        st.stop()
+    if not st.user.to_dict().get("sub"):
+        st.error("Your sign-in could not be verified.")
+        st.stop()
 
 settings = load_settings()
 st.markdown(base_css(settings["dark"]), unsafe_allow_html=True)
@@ -202,7 +212,7 @@ def calendar_page():
         if not matches:
             st.caption("No photos for this date.")
         for entry in matches:
-            photo = gallery_app.IMG_DIR / entry["photo"]
+            photo = gallery_app.image_directory() / entry["photo"]
             if photo.is_file():
                 st.image(str(photo), caption=entry["caption"])
 
@@ -307,6 +317,8 @@ def quick_controls():
         st.button("Wallpaper settings", on_click=go, args=("settings",))
         if settings["lock_on"]:
             st.button("Lock phone", on_click=lock_phone)
+        if not local_mode():
+            st.button("Sign out", on_click=st.logout)
 
 
 def home():

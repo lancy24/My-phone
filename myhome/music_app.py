@@ -3,14 +3,14 @@ from pathlib import Path
 
 import streamlit as st
 
+from storage import media_directory
 
-MUSIC_DIR = Path("music")
-MUSIC_DIR.mkdir(exist_ok=True)
 
 
 def list_songs():
     exts = {".mp3", ".wav", ".ogg", ".m4a"}
-    return sorted(p for p in MUSIC_DIR.iterdir() if p.suffix.lower() in exts)
+    return sorted(p for p in media_directory("music").iterdir()
+                  if p.is_file() and p.suffix.lower() in exts)
 
 
 def run():
@@ -23,8 +23,9 @@ def run():
     )
 
     if st.button("➕ Add to playlist") and files:
+        directory = media_directory("music")
         for f in files:
-            (MUSIC_DIR / f.name).write_bytes(f.getbuffer())
+            (directory / Path(f.name).name).write_bytes(f.getbuffer())
         st.success("Songs added ✅")
         st.rerun()
 
@@ -35,7 +36,7 @@ def run():
 
     names = [p.name for p in songs]
     current = st.selectbox("🎧 Now playing", names, key="music_now")
-    path = MUSIC_DIR / current
+    path = next(song for song in songs if song.name == current)
     mime = mimetypes.guess_type(path.name)[0] or "audio/mpeg"
     st.audio(path.read_bytes(), format=mime)
 

@@ -1,6 +1,6 @@
 import streamlit as st
 
-from gallery_app import list_images
+from gallery_app import image_directory, list_images
 from look import load_settings, save_settings, WALLPAPERS
 
 
@@ -32,7 +32,7 @@ def run():
 
         if choice == "📷 Photo from Gallery":
             photo = st.selectbox("Pick a picture", photos, key="set_photo")
-            st.image(f"images/{photo}", width=200)
+            st.image(str(image_directory() / photo), width=200)
             new_wall = f"img:{photo}"
         else:
             st.markdown(
