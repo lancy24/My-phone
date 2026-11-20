@@ -78,10 +78,13 @@ def esc(text):
 
 @st.fragment(run_every=60)
 def status_bar():
-    battery = psutil.sensors_battery()
+    try:
+        battery = psutil.sensors_battery()
+    except (OSError, NotImplementedError):
+        battery = None
 
     if battery is None:
-        battery_text = "Battery unavailable"
+        battery_text = ""
     else:
         battery_icon = "⚡" if battery.power_plugged else "🔋"
         battery_text = f"{battery_icon} {battery.percent}%"
