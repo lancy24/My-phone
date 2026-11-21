@@ -10,12 +10,7 @@ from gallery_app import image_directory
 
 def run(open_gallery):
     st.title("📷 Camera")
-    source = st.radio("Photo source", ["Live camera", "Phone camera or photos"], horizontal=True)
-    if source == "Live camera":
-        st.caption("Allow camera access in your browser. If the preview stays blank, try Phone camera or photos.")
-        photo = st.camera_input("Take a picture")
-    else:
-        photo = st.file_uploader("Choose Camera or a photo in your phone's picker", type=["jpg", "jpeg", "png", "webp"])
+    photo = st.camera_input("Take a picture")
 
     if photo and st.button("Save to Gallery", type="primary"):
         capture = f"Camera-{datetime.now():%Y%m%d-%H%M%S}-{uuid4().hex[:8]}.jpg"
