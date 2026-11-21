@@ -2,6 +2,7 @@ import streamlit as st
 
 from gallery_app import image_directory, list_images
 from look import load_settings, save_settings, WALLPAPERS
+from storage import local_mode, settings_bucket
 
 
 def run():
@@ -53,6 +54,8 @@ def run():
             st.rerun()
 
         st.subheader("Change PIN")
+        if not local_mode() and not settings_bucket():
+            st.caption("This deployment uses temporary storage. A server restart can reset your PIN.")
         with st.form("pin_form", clear_on_submit=True):
             old = st.text_input("Current PIN", type="password", max_chars=4)
             new = st.text_input("New PIN (4 digits)", type="password", max_chars=4)

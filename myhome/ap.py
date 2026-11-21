@@ -1,9 +1,10 @@
 import calendar as pycalendar
 import html
-from datetime import date, datetime
+from datetime import date
 
 import psutil
 import streamlit as st
+from streamlit.errors import StreamlitAPIException
 
 import Notes
 import gallery_app
@@ -22,7 +23,10 @@ if not local_mode():
     if not getattr(st.user, "is_logged_in", False):
         st.title("📱 My Phone")
         if st.button("Sign in with Google", type="primary"):
-            st.login()
+            try:
+                st.login()
+            except StreamlitAPIException:
+                st.error("Google sign-in could not start. Please try again or contact the app owner.")
         st.stop()
     if not st.user.to_dict().get("sub"):
         st.error("Your sign-in could not be verified.")
@@ -106,15 +110,28 @@ def status_bar():
     )
 
 
-@st.fragment(run_every=10)
 def clock_widget():
-    now = datetime.now()
-
-    st.markdown(
-        f'<div class="widget">'
-        f'<div class="clock-time">{now:%H:%M}</div>'
-        f'</div>',
-        unsafe_allow_html=True,
+    st.html(
+        """
+        <div class="widget"><div id="my-phone-clock" class="clock-time"></div></div>
+        <script>
+        (() => {
+          const clock = document.getElementById("my-phone-clock");
+          if (!clock || clock.dataset.running) return;
+          clock.dataset.running = "true";
+          const format = new Intl.DateTimeFormat(undefined, {
+            hour: "2-digit", minute: "2-digit", hourCycle: "h23"
+          });
+          const tick = () => {
+            if (!clock.isConnected) return;
+            clock.textContent = format.format(new Date());
+            setTimeout(tick, 60000 - Date.now() % 60000);
+          };
+          tick();
+        })();
+        </script>
+        """,
+        unsafe_allow_javascript=True,
     )
 
 
@@ -272,6 +289,8 @@ def lock_screen():
                     args=(key,),
                     use_container_width=True,
                 )
+    if not local_mode():
+        st.button("Switch Google account", on_click=st.logout, use_container_width=True)
 
 
 APPS = [

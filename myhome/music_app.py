@@ -1,4 +1,3 @@
-import mimetypes
 from pathlib import Path
 
 import streamlit as st
@@ -6,15 +5,21 @@ import streamlit as st
 from storage import media_directory
 
 
+AUDIO_TYPES = {
+    ".mp3": "audio/mpeg",
+    ".wav": "audio/wav",
+    ".ogg": "audio/ogg",
+    ".m4a": "audio/mp4",
+}
 
 def list_songs():
-    exts = {".mp3", ".wav", ".ogg", ".m4a"}
     return sorted(p for p in media_directory("music").iterdir()
-                  if p.is_file() and p.suffix.lower() in exts)
+                  if p.is_file() and p.suffix.lower() in AUDIO_TYPES)
 
 
 def run():
     st.title("🎵 Music")
+    st.caption("Choose a song and tap Play. If a file does not play on your phone, try an MP3.")
 
     files = st.file_uploader(
         "Add songs",
@@ -37,8 +42,14 @@ def run():
     names = [p.name for p in songs]
     current = st.selectbox("🎧 Now playing", names, key="music_now")
     path = next(song for song in songs if song.name == current)
-    mime = mimetypes.guess_type(path.name)[0] or "audio/mpeg"
-    st.audio(path.read_bytes(), format=mime)
+    try:
+        audio = path.read_bytes()
+    except FileNotFoundError:
+        st.warning("This song was removed. Reopen Music to refresh the playlist.")
+        return
+    mime = AUDIO_TYPES[path.suffix.lower()]
+    st.audio(audio, format=mime, autoplay=False)
+    st.download_button("Download song", audio, file_name=path.name, mime=mime)
 
     st.subheader("📜 Playlist")
     for i, p in enumerate(songs):
